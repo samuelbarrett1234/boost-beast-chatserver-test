@@ -1,0 +1,12 @@
+cmake_minimum_required (VERSION 3.26)
+
+add_executable(server
+    "main.cpp"
+    "server.cpp"
+    "listener.cpp"
+    "http_session.cpp"
+    "websocket_session.cpp")
+
+target_link_libraries(server PUBLIC Boost::boost)
+
+install(TARGETS server RUNTIME DESTINATION .)
