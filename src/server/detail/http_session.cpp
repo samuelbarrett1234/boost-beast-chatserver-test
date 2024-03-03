@@ -31,9 +31,10 @@ void Session::States::Read::operator()(
         /*
         * Create a websocket session and transfer ownership.
         */
-        WebsocketSession::run(WebsocketSession::start(
-            std::move(p_session->p_server_state), p_session->stream.release_socket()),
-                p_parser->release());
+        websocket::start(
+            std::move(p_session->p_server_state),
+            p_session->stream.release_socket(),
+            p_parser->release());
 
         return;
     }

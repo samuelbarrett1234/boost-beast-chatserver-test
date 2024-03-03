@@ -13,7 +13,7 @@ void Server::States::Join::operator()()
 
 void Server::States::Join::enter(
     std::shared_ptr<Server> p_server_state,
-    std::shared_ptr<WebsocketSession> p_session)
+    std::shared_ptr<websocket::Session> p_session)
 {
     auto& strand = p_server_state->strand;
     boost::asio::dispatch(
@@ -41,7 +41,7 @@ void Server::States::Broadcast::operator()()
         if (auto p_session = begin->lock())
         {
             ++begin;
-            WebsocketSession::async_send(std::move(p_session), p_msg);
+            websocket::async_send(std::move(p_session), p_msg);
         }
         else
         {

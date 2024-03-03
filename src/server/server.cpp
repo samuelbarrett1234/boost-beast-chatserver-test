@@ -15,7 +15,7 @@ std::shared_ptr<server::Server> start(
 
 void async_join(
     std::shared_ptr<server::Server> p_server_state,
-    std::shared_ptr<WebsocketSession> p_session)
+    std::shared_ptr<websocket::Session> p_session)
 {
     server::Server::States::Join::enter(
         std::move(p_server_state), std::move(p_session));

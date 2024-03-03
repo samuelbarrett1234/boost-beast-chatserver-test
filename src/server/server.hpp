@@ -7,7 +7,14 @@
 #include <boost/asio/io_context.hpp>
 
 
-class WebsocketSession;  // forward declaration
+namespace websocket
+{
+
+
+struct Session;  // forward declaration
+
+
+}  // namespace websocket
 
 
 namespace server
@@ -23,7 +30,7 @@ std::shared_ptr<Server> start(
 
 void async_join(
     std::shared_ptr<Server> p_server_state,
-    std::shared_ptr<WebsocketSession> p_session);
+    std::shared_ptr<websocket::Session> p_session);
 
 
 void async_broadcast(

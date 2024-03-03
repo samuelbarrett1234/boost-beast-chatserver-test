@@ -27,20 +27,20 @@ struct Server
     */
     boost::asio::strand<boost::asio::io_context::executor_type> strand;
 
-    std::vector<std::weak_ptr<WebsocketSession>> sessions;
+    std::vector<std::weak_ptr<websocket::Session>> sessions;
 
     struct States
     {
         struct Join
         {
             std::shared_ptr<Server> p_server_state;
-            std::shared_ptr<WebsocketSession> p_session;
+            std::shared_ptr<websocket::Session> p_session;
 
             void operator()();
 
             static void enter(
                 std::shared_ptr<Server> p_server_state,
-                std::shared_ptr<WebsocketSession> p_session);
+                std::shared_ptr<websocket::Session> p_session);
         };
 
         struct Broadcast
