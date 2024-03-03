@@ -1,30 +1,15 @@
 #include "listener.hpp"
+#include "detail/listener.hpp"
 #include "errors.hpp"
-#include "http_session.hpp"
 
 
-std::unique_ptr<Listener> Listener::make(
+void make_and_run_listener(
     boost::asio::io_context& ioc,
-    std::shared_ptr<ServerState> _p_server_state,
+    std::shared_ptr<ServerState> p_server_state,
     boost::asio::ip::tcp::endpoint endpoint)
 {
-    /*
-    * See:
-    * https://stackoverflow.com/questions/8147027/how-do-i-call-stdmake-shared-on-a-class-with-only-protected-or-private-const
-    */
-    class ListenerWithPublicConstructor :
-        public Listener
-    {
-    public:
-        inline ListenerWithPublicConstructor(
-            boost::asio::io_context& _ioc,
-            std::shared_ptr<ServerState> _p_server_state) :
-            Listener(_ioc, std::move(_p_server_state))
-        { }
-    };
-
-    auto p_listener = std::make_unique<ListenerWithPublicConstructor>(
-        ioc, std::move(_p_server_state));
+    auto p_listener = std::make_unique<Listener>(
+        ioc, std::move(p_server_state));
 
     boost::beast::error_code ec;
 
@@ -70,59 +55,8 @@ std::unique_ptr<Listener> Listener::make(
         boost::asio::socket_base::max_listen_connections, ec);
     SERVER_VALIDATE_ERROR_CODE(ec);
 
-    return p_listener;
-}
-
-
-void Listener::run(std::unique_ptr<Listener> _p_listener)
-{
-    auto p_listener = _p_listener.get();
-
     /*
-    * By creating a new strand here, this will be used as the
-    * executor for the newly-created socket upon completion
-    * of the `async_accept`. This will effectively serialise
-    * the whole `HttpSession` created in `on_accept`.
+    * Move the `Listener` into the `Accept` state.
     */
-    p_listener->acceptor.async_accept(
-        boost::asio::make_strand(p_listener->ioc),
-        [p_listener = std::move(_p_listener)](
-            boost::beast::error_code ec,
-            boost::asio::ip::tcp::socket socket) mutable
-        {
-            on_accept(std::move(p_listener), std::move(ec), std::move(socket));
-        }
-    );
-}
-
-
-void Listener::on_accept(
-    std::unique_ptr<Listener> _p_listener,
-    boost::beast::error_code ec,
-    boost::asio::ip::tcp::socket socket)
-{
-    auto p_listener = _p_listener.get();
-
-    SERVER_VALIDATE_ERROR_CODE(ec);
-
-    /*
-    * Start a new HTTP session.
-    */
-    HttpSession::run(HttpSession::make(p_listener->p_server_state, std::move(socket)));
-
-    /*
-    * By creating a new strand here, this will be used as the
-    * executor for the newly-created socket upon completion
-    * of the `async_accept`. This will effectively serialise
-    * the whole `HttpSession` created in `on_accept`.
-    */
-    p_listener->acceptor.async_accept(
-        boost::asio::make_strand(p_listener->ioc),
-        [p_listener = std::move(_p_listener)](
-            boost::beast::error_code ec,
-            boost::asio::ip::tcp::socket socket) mutable
-        {
-            on_accept(std::move(p_listener), std::move(ec), std::move(socket));
-        }
-    );
+    Listener::States::Accept::enter(std::move(p_listener));
 }

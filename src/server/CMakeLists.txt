@@ -5,6 +5,7 @@ add_executable(server
     "main.cpp"
     "server.cpp"
     "listener.cpp"
+    "detail/listener.cpp"
     "http_session.cpp"
     "websocket_session.cpp")
 

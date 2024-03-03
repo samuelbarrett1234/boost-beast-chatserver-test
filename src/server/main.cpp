@@ -24,11 +24,8 @@ int main(const int argc, char* argv[])
         */
         auto p_server_state = ServerState::make(ioc);
 
-        /*
-        * Create and then immediately launch the listener.
-        */
-        Listener::run(Listener::make(
-            ioc, p_server_state, boost::asio::ip::tcp::endpoint{ address, port }));
+        make_and_run_listener(
+            ioc, p_server_state, boost::asio::ip::tcp::endpoint{ address, port });
 
         /*
         * Capture interrupt and termination signals.
