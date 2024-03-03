@@ -3,7 +3,11 @@
 #include "../websocket_session.hpp"
 
 
-void HttpSession::States::Read::operator()(
+namespace http
+{
+
+
+void Session::States::Read::operator()(
     boost::beast::error_code ec,
     const size_t bytes_read)
 {
@@ -27,7 +31,7 @@ void HttpSession::States::Read::operator()(
         /*
         * Create a websocket session and transfer ownership.
         */
-        WebsocketSession::run(WebsocketSession::make(
+        WebsocketSession::run(WebsocketSession::start(
             std::move(p_session->p_server_state), p_session->stream.release_socket()),
                 p_parser->release());
 
@@ -64,8 +68,8 @@ void HttpSession::States::Read::operator()(
 }
 
 
-void HttpSession::States::Read::enter(
-    std::unique_ptr<HttpSession> p_session)
+void Session::States::Read::enter(
+    std::unique_ptr<Session> p_session)
 {
     auto p_parser = std::make_unique<Parser>();
 
@@ -86,7 +90,7 @@ void HttpSession::States::Read::enter(
 }
 
 
-void HttpSession::States::Write::operator()(
+void Session::States::Write::operator()(
     boost::beast::error_code ec,
     const size_t bytes_read)
 {
@@ -112,8 +116,8 @@ void HttpSession::States::Write::operator()(
 }
 
 
-void HttpSession::States::Write::enter(
-    std::unique_ptr<HttpSession> p_session,
+void Session::States::Write::enter(
+    std::unique_ptr<Session> p_session,
     boost::beast::http::message_generator msg,
     const bool keep_alive)
 {
@@ -123,3 +127,6 @@ void HttpSession::States::Write::enter(
         std::move(msg),
         Write{ std::move(p_session), keep_alive });
 }
+
+
+}  // namespace http

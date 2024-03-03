@@ -17,9 +17,13 @@ struct Server;  // forward declaration
 }  // namespace server
 
 
-struct HttpSession
+namespace http
 {
-    inline HttpSession(
+
+
+struct Session
+{
+    inline Session(
         std::shared_ptr<server::Server> p_server_state,
         boost::asio::ip::tcp::socket socket) :
         p_server_state(std::move(p_server_state)),
@@ -34,9 +38,10 @@ struct HttpSession
     {
         struct Read
         {
-            using Parser = boost::beast::http::request_parser<boost::beast::http::string_body>;
+            using Parser = boost::beast::http::request_parser<
+                boost::beast::http::string_body>;
 
-            std::unique_ptr<HttpSession> p_session;
+            std::unique_ptr<Session> p_session;
             std::unique_ptr<Parser> p_parser;
 
             void operator()(
@@ -44,12 +49,12 @@ struct HttpSession
                 size_t bytes_read);
 
             static void enter(
-                std::unique_ptr<HttpSession> p_session);
+                std::unique_ptr<Session> p_session);
         };
 
         struct Write
         {
-            std::unique_ptr<HttpSession> p_session;
+            std::unique_ptr<Session> p_session;
             bool keep_alive;
 
             void operator()(
@@ -57,12 +62,15 @@ struct HttpSession
                 size_t bytes_read);
 
             static void enter(
-                std::unique_ptr<HttpSession> p_session,
+                std::unique_ptr<Session> p_session,
                 boost::beast::http::message_generator msg,
                 bool keep_alive);
         };
     };
 };
+
+
+}  // namespace http
 
 
 #endif  // SERVER_DETAIL_HTTP_SESSION_HPP

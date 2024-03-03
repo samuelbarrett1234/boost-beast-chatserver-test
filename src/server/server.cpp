@@ -6,7 +6,7 @@ namespace server
 {
 
 
-std::shared_ptr<server::Server> make(
+std::shared_ptr<server::Server> start(
     boost::asio::io_context& ioc)
 {
     return std::make_shared<server::Server>(ioc);

@@ -22,7 +22,7 @@ struct Server;  // forward declaration
 class WebsocketSession
 {
 public:
-    static inline std::shared_ptr<WebsocketSession> make(
+    static inline std::shared_ptr<WebsocketSession> start(
         std::shared_ptr<server::Server> p_server_state,
         boost::asio::ip::tcp::socket socket)
     {

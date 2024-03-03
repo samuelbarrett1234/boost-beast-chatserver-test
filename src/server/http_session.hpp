@@ -16,9 +16,16 @@ struct Server;  // forward declaration
 }  // namespace server
 
 
-void begin_http_session(
+namespace http
+{
+
+
+void start_session(
     std::shared_ptr<server::Server> p_server_state,
     boost::asio::ip::tcp::socket socket);
+
+
+}  // namespace http
 
 
 #endif  // SERVER_HTTP_SESSION_HPP

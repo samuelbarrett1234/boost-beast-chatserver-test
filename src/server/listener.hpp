@@ -17,10 +17,17 @@ struct Server;  // forward declaration
 }  // namespace server
 
 
-void make_and_run_listener(
+namespace listener
+{
+
+
+void start(
     boost::asio::io_context& ioc,
     std::shared_ptr<server::Server> p_server_state,
     boost::asio::ip::tcp::endpoint endpoint);
+
+
+}  // namespace listener
 
 
 #endif  // SERVER_LISTENER_HPP

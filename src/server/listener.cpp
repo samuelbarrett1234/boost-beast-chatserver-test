@@ -3,7 +3,11 @@
 #include "errors.hpp"
 
 
-void make_and_run_listener(
+namespace listener
+{
+
+
+void start(
     boost::asio::io_context& ioc,
     std::shared_ptr<server::Server> p_server_state,
     boost::asio::ip::tcp::endpoint endpoint)
@@ -60,3 +64,6 @@ void make_and_run_listener(
     */
     Listener::States::Accept::enter(std::move(p_listener));
 }
+
+
+}  // namespace listener

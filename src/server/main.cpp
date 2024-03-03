@@ -19,9 +19,12 @@ int main(const int argc, char* argv[])
 
         boost::asio::io_context ioc;
 
-        make_and_run_listener(
+        /*
+        * Start the server and the listener for incoming connections.
+        */
+        listener::start(
             ioc,
-            server::make(ioc),
+            server::start(ioc),
             boost::asio::ip::tcp::endpoint{ address, port });
 
         /*

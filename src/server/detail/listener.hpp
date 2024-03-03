@@ -17,6 +17,10 @@ struct Server;  // forward declaration
 }  // namespace server
 
 
+namespace listener
+{
+
+
 struct Listener
 {
     inline Listener(
@@ -25,10 +29,6 @@ struct Listener
         acceptor(_ioc),
         p_server_state(std::move(_p_server_state))
     { }
-
-    /*
-    * Data
-    */
 
     boost::asio::io_context& ioc;
     boost::asio::ip::tcp::acceptor acceptor;
@@ -48,6 +48,9 @@ struct Listener
         };
     };
 };
+
+
+}  // namespace listener
 
 
 #endif  // SERVER_DETAIL_LISTENER_HPP

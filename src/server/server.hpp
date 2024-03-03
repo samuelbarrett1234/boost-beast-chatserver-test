@@ -17,7 +17,7 @@ namespace server
 struct Server;  // forward declaration
 
 
-std::shared_ptr<Server> make(
+std::shared_ptr<Server> start(
     boost::asio::io_context& ioc);
 
 
