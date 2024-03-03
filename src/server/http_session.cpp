@@ -62,20 +62,31 @@ void HttpSession::on_read(
 
     const auto req = p_session->parser->release();
 
-    boost::beast::http::response<boost::beast::http::string_body> res{
-        boost::beast::http::status::not_found, req.version()};
-    res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
-    res.set(boost::beast::http::field::content_type, "text/html");
-    res.keep_alive(req.keep_alive());
-    res.body() = "The resource was not found.";
-    res.prepare_payload();
+    auto msg = [&]() -> boost::beast::http::message_generator
+    {
+        /*
+        * Construct HTTP response from request.
+        * Note that `boost::beast::http::message_generator`
+        * is used for type erasure of the response, and also
+        * I think automatically exposes the right kind of
+        * "buffer view" to be used in `async_write`.
+        */
 
-    const bool keep_alive = req.keep_alive();
+        boost::beast::http::response<boost::beast::http::string_body> res{
+            boost::beast::http::status::not_found, req.version()};
+        res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(boost::beast::http::field::content_type, "text/html");
+        res.keep_alive(req.keep_alive());
+        res.body() = "The resource was not found.";
+        res.prepare_payload();
+        return res;
+
+    }();
 
     boost::beast::async_write(
         p_session->stream,
-        boost::beast::http::message_generator(std::move(res)),
-        [p_session = std::move(_p_session), keep_alive](
+        std::move(msg),
+        [p_session = std::move(_p_session), keep_alive = req.keep_alive()](
             boost::beast::error_code ec, const size_t bytes_written) mutable
         {
             on_write(
