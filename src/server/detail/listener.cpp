@@ -12,8 +12,8 @@ void Listener::States::Accept::operator()(
     /*
     * Start a new HTTP session.
     */
-    HttpSession::run(HttpSession::make(
-        p_listener->p_server_state, std::move(socket)));
+    begin_http_session(
+        p_listener->p_server_state, std::move(socket));
 
     /*
     * Return to `Accept` state.
