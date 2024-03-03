@@ -33,7 +33,7 @@ void HttpSession::on_read(
 {
     auto p_session = _p_session.get();
 
-    if (ec = boost::beast::http::error::end_of_stream)
+    if (ec == boost::beast::http::error::end_of_stream)
     {
         /*
         * Gracefully close socket.
