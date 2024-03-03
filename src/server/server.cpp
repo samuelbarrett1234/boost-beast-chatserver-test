@@ -1,11 +1,6 @@
 #include "server.hpp"
 #include "errors.hpp"
-
-
-std::shared_ptr<ServerState> ServerState::make(boost::asio::io_context& ioc)
-{
-    return std::make_shared<ServerState>(ioc);
-}
+#include "websocket_session.hpp"
 
 
 void ServerState::async_join(
@@ -14,11 +9,10 @@ void ServerState::async_join(
 {
     auto p_server_state = _p_server_state.get();
 
-    /*
-    * Is `post` the best method here, or can we use `defer` etc?
-    */
-    p_server_state->strand.post(
-        [p_server_state = std::move(_p_server_state), p_session = std::move(p_session)]()
+    boost::asio::dispatch(
+        p_server_state->strand,
+        [p_server_state = std::move(_p_server_state),
+            p_session = std::move(p_session)]() mutable
         {
             p_server_state->sessions.emplace_back(std::move(p_session));
         });
@@ -31,12 +25,10 @@ void ServerState::async_broadcast(
 {
     auto p_server_state = _p_server_state.get();
 
-    /*
-    * Is `post` the best method here, or can we use `defer` etc?
-    */
-    p_server_state->strand.post(
+    boost::asio::dispatch(
+        p_server_state->strand,
         [p_server_state = std::move(_p_server_state),
-            p_msg = std::make_shared<std::string>(std::move(msg))]()
+            p_msg = std::make_shared<std::string>(std::move(msg))]() mutable
         {
             /*
             * Walk through this array, and at each element try locking

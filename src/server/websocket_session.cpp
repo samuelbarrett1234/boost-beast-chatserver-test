@@ -17,7 +17,8 @@ void WebsocketSession::async_send(
     */
     boost::asio::post(
         p_session->stream.get_executor(),
-        [p_session = std::move(_p_session), p_msg = std::move(p_msg)]()
+        [p_session = std::move(_p_session),
+            p_msg = std::move(p_msg)]() mutable
         {
             p_session->send_queue.push_back(std::move(p_msg));
 
@@ -43,6 +44,34 @@ void WebsocketSession::async_send(
 }
 
 
+void WebsocketSession::run(
+    std::shared_ptr<WebsocketSession> _p_session,
+    boost::beast::http::request<boost::beast::http::string_body> req)
+{
+    auto p_session = _p_session.get();
+
+    p_session->stream.set_option(
+        boost::beast::websocket::stream_base::timeout::suggested(
+            boost::beast::role_type::server));
+
+    p_session->stream.set_option(boost::beast::websocket::stream_base::decorator(
+        [](boost::beast::websocket::response_type& res)
+        {
+            res.set(boost::beast::http::field::server,
+                std::string(BOOST_BEAST_VERSION_STRING) +
+                    " boost-beast-chatserver-test");
+        }));
+
+    p_session->stream.async_accept(
+        std::move(req),
+        [p_session = std::move(_p_session)](
+            boost::beast::error_code ec) mutable
+        {
+            WebsocketSession::on_accept(std::move(p_session), ec);
+        });
+}
+
+
 void WebsocketSession::on_accept(
     std::shared_ptr<WebsocketSession> _p_session,
     boost::beast::error_code ec)
@@ -57,7 +86,7 @@ void WebsocketSession::on_accept(
         p_session->buffer,
         [p_session = std::move(_p_session)](
             boost::beast::error_code ec,
-            const size_t bytes_read)
+            const size_t bytes_read) mutable
         {
             WebsocketSession::on_read(std::move(p_session), ec, bytes_read);
         });
@@ -89,7 +118,7 @@ void WebsocketSession::on_read(
 
     ServerState::async_broadcast(
         p_session->p_server_state,
-        boost::beast::buffers_to_string(p_session->buffer.data(), bytes_read));
+        boost::beast::buffers_to_string(p_session->buffer.data()));
 
     p_session->buffer.consume(bytes_read);
 
@@ -97,7 +126,7 @@ void WebsocketSession::on_read(
         p_session->buffer,
         [p_session = std::move(_p_session)](
             boost::beast::error_code ec,
-            const size_t bytes_read)
+            const size_t bytes_read) mutable
         {
             WebsocketSession::on_read(std::move(p_session), ec, bytes_read);
         });
@@ -128,9 +157,9 @@ void WebsocketSession::on_write(
     */
     p_session->stream.async_write(
         boost::asio::buffer(*p_session->send_queue.front()),
-        [p_session = std::move(p_session)](
+        [p_session = std::move(_p_session)](
             boost::beast::error_code ec,
-            const size_t bytes_written)
+            const size_t bytes_written) mutable
         {
             WebsocketSession::on_write(std::move(p_session), ec, bytes_written);
         });

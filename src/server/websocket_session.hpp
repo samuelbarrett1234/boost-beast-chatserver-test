@@ -12,26 +12,41 @@
 class ServerState;  // forward declaration
 
 
-struct WebsocketSession
+class WebsocketSession
 {
+public:
     static inline std::shared_ptr<WebsocketSession> make(
         std::shared_ptr<ServerState> p_server_state,
         boost::asio::ip::tcp::socket socket)
     {
-        return std::make_shared<WebsocketSession>(
+        /*
+        * See:
+        * https://stackoverflow.com/questions/8147027/how-do-i-call-stdmake-shared-on-a-class-with-only-protected-or-private-const
+        */
+        class WebsocketSessionWithPublicConstructor :
+            public WebsocketSession
+        {
+        public:
+            inline WebsocketSessionWithPublicConstructor(
+                std::shared_ptr<ServerState> _p_server_state,
+                boost::asio::ip::tcp::socket socket) :
+                WebsocketSession(std::move(_p_server_state), std::move(socket))
+            { }
+        };
+
+        return std::make_shared<WebsocketSessionWithPublicConstructor>(
             std::move(p_server_state), std::move(socket));
     }
 
-    static inline void run(std::shared_ptr<WebsocketSession> p_session)
-    {
-        do_read(std::move(p_session));
-    }
+    static void run(
+        std::shared_ptr<WebsocketSession> p_session,
+        boost::beast::http::request<boost::beast::http::string_body> req);
 
     static void async_send(
         std::shared_ptr<WebsocketSession> p_session,
         std::shared_ptr<std::string> p_msg);
 
-private:
+protected:
     inline WebsocketSession(
         std::shared_ptr<ServerState> _p_server_state,
         boost::asio::ip::tcp::socket socket) :
@@ -41,7 +56,6 @@ private:
 
     boost::beast::websocket::stream<boost::beast::tcp_stream> stream;
     boost::beast::flat_buffer buffer;
-    boost::beast::websocket::request_parser<boost::beast::websocket::string_body> parser;
     std::shared_ptr<ServerState> p_server_state;
 
     /*

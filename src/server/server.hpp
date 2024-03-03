@@ -14,7 +14,23 @@ class WebsocketSession;  // forward declaration
 class ServerState
 {
 public:
-    static std::shared_ptr<ServerState> make(boost::asio::io_context& ioc);
+    static inline std::shared_ptr<ServerState> make(boost::asio::io_context& ioc)
+    {
+        /*
+        * See:
+        * https://stackoverflow.com/questions/8147027/how-do-i-call-stdmake-shared-on-a-class-with-only-protected-or-private-const
+        */
+        class ServerStateWithPublicConstructor :
+            public ServerState
+        {
+        public:
+            inline ServerStateWithPublicConstructor(boost::asio::io_context& ioc) :
+                ServerState(ioc)
+            { }
+        };
+
+        return std::make_shared<ServerStateWithPublicConstructor>(ioc);
+    }
 
     /*
     * Rather than use a mutex, all of these functions are async instead.
@@ -28,15 +44,15 @@ public:
         std::shared_ptr<ServerState> p_server_state,
         std::string msg);
 
-private:
+protected:
     inline ServerState(boost::asio::io_context& ioc) :
-        strand(ioc)
+        strand(boost::asio::make_strand(ioc))
     { }
 
     /*
     * This strand governs access to `sessions`.
     */
-    boost::asio::strand<boost::asio::io_context> strand;
+    boost::asio::strand<boost::asio::io_context::executor_type> strand;
     std::vector<std::weak_ptr<WebsocketSession>> sessions;
 };
 

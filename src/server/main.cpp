@@ -22,7 +22,7 @@ int main(const int argc, char* argv[])
         /*
         * Create the server shared state.
         */
-        auto p_server_state = ServerState::make();
+        auto p_server_state = ServerState::make(ioc);
 
         /*
         * Create and then immediately launch the listener.
