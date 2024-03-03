@@ -5,7 +5,7 @@
 
 void make_and_run_listener(
     boost::asio::io_context& ioc,
-    std::shared_ptr<ServerState> p_server_state,
+    std::shared_ptr<server::Server> p_server_state,
     boost::asio::ip::tcp::endpoint endpoint)
 {
     auto p_listener = std::make_unique<Listener>(

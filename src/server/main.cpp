@@ -19,13 +19,10 @@ int main(const int argc, char* argv[])
 
         boost::asio::io_context ioc;
 
-        /*
-        * Create the server shared state.
-        */
-        auto p_server_state = ServerState::make(ioc);
-
         make_and_run_listener(
-            ioc, p_server_state, boost::asio::ip::tcp::endpoint{ address, port });
+            ioc,
+            server::make(ioc),
+            boost::asio::ip::tcp::endpoint{ address, port });
 
         /*
         * Capture interrupt and termination signals.

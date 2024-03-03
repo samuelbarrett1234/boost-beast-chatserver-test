@@ -4,6 +4,7 @@ add_executable(server
     "errors.cpp"
     "main.cpp"
     "server.cpp"
+    "detail/server.cpp"
     "listener.cpp"
     "detail/listener.cpp"
     "http_session.cpp"

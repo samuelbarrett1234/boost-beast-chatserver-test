@@ -7,13 +7,20 @@
 #include <boost/asio.hpp>
 
 
-class ServerState;  // forward declaration
+namespace server
+{
+
+
+struct Server;  // forward declaration
+
+
+}  // namespace server
 
 
 struct Listener
 {
     inline Listener(
-        boost::asio::io_context& _ioc, std::shared_ptr<ServerState> _p_server_state) :
+        boost::asio::io_context& _ioc, std::shared_ptr<server::Server> _p_server_state) :
         ioc(_ioc),
         acceptor(_ioc),
         p_server_state(std::move(_p_server_state))
@@ -25,7 +32,7 @@ struct Listener
 
     boost::asio::io_context& ioc;
     boost::asio::ip::tcp::acceptor acceptor;
-    std::shared_ptr<ServerState> p_server_state;
+    std::shared_ptr<server::Server> p_server_state;
 
     struct States
     {

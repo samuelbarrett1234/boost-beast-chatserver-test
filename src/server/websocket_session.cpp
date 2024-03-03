@@ -80,7 +80,7 @@ void WebsocketSession::on_accept(
 
     SERVER_VALIDATE_ERROR_CODE(ec);
 
-    ServerState::async_join(p_session->p_server_state, _p_session);
+    server::async_join(p_session->p_server_state, _p_session);
 
     p_session->stream.async_read(
         p_session->buffer,
@@ -116,7 +116,7 @@ void WebsocketSession::on_read(
 
     SERVER_VALIDATE_ERROR_CODE(ec);
 
-    ServerState::async_broadcast(
+    server::async_broadcast(
         p_session->p_server_state,
         boost::beast::buffers_to_string(p_session->buffer.data()));
 

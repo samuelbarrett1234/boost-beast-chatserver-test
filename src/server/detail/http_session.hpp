@@ -7,13 +7,20 @@
 #include <boost/asio.hpp>
 
 
-class ServerState;  // forward declaration
+namespace server
+{
+
+
+struct Server;  // forward declaration
+
+
+}  // namespace server
 
 
 struct HttpSession
 {
     inline HttpSession(
-        std::shared_ptr<ServerState> p_server_state,
+        std::shared_ptr<server::Server> p_server_state,
         boost::asio::ip::tcp::socket socket) :
         p_server_state(std::move(p_server_state)),
         stream(std::move(socket))
@@ -21,7 +28,7 @@ struct HttpSession
 
     boost::beast::tcp_stream stream;
     boost::beast::flat_buffer buffer;
-    std::shared_ptr<ServerState> p_server_state;
+    std::shared_ptr<server::Server> p_server_state;
 
     struct States
     {
